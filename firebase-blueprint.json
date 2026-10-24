@@ -1,0 +1,169 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Registered user profile with auth details",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "User ID matching auth.uid"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "User email address"
+        },
+        "displayName": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "User display name"
+        },
+        "photoURL": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "User profile avatar URL"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Account creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Account update timestamp"
+        }
+      },
+      "required": ["id", "email", "createdAt"]
+    },
+    "SavedKundali": {
+      "title": "SavedKundali",
+      "description": "User saved Lal Kitab Kundali horoscope record",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique Kundali ID"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Owner user ID"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Seeker name"
+        },
+        "gender": {
+          "type": "string",
+          "enum": ["male", "female", "other"],
+          "description": "Seeker gender"
+        },
+        "dob": {
+          "type": "string",
+          "maxLength": 15,
+          "description": "Date of birth YYYY-MM-DD"
+        },
+        "tob": {
+          "type": "string",
+          "maxLength": 10,
+          "description": "Time of birth HH:mm"
+        },
+        "pob": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Place of birth city"
+        },
+        "currentAge": {
+          "type": "number",
+          "description": "Current age in years"
+        },
+        "majorObstacle": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Primary life obstacle or query"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Update timestamp"
+        }
+      },
+      "required": ["id", "userId", "name", "dob", "tob", "pob", "createdAt"]
+    },
+    "RemedyTracker": {
+      "title": "RemedyTracker",
+      "description": "40-43 day Lal Kitab remedy tracking journal",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique tracker ID"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Owner user ID"
+        },
+        "remedyTitle": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Title of the Lal Kitab Totka/Remedy"
+        },
+        "planet": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Associated planet"
+        },
+        "targetDays": {
+          "type": "number",
+          "description": "Target continuous days (typically 40 or 43)"
+        },
+        "completedDays": {
+          "type": "number",
+          "description": "Number of days completed"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "completed", "paused"],
+          "description": "Status of the remedy track"
+        },
+        "startDate": {
+          "type": "string",
+          "maxLength": 20,
+          "description": "Start date"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Update timestamp"
+        }
+      },
+      "required": ["id", "userId", "remedyTitle", "targetDays", "completedDays", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile document isolated per user"
+    },
+    "/savedKundalis/{kundaliId}": {
+      "schema": "SavedKundali",
+      "description": "Lal Kitab horoscopes saved by users"
+    },
+    "/remedyTrackers/{trackerId}": {
+      "schema": "RemedyTracker",
+      "description": "43-day uninterrupted Lal Kitab remedy tracking records"
+    }
+  }
+}

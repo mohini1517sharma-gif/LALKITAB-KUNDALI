@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-heading: 'Yatra One', 'Cinzel', serif;
+    --font-sans: 'Noto Sans Devanagari', system-ui, -apple-system, sans-serif;
+  }
+  
+  body {
+    font-family: var(--font-sans);
+    background-color: #120707;
+    color: #f5f2eb;
+  }
+}
+
+.font-cinzel {
+  font-family: 'Cinzel', serif;
+}
+
+.font-yatra {
+  font-family: 'Yatra One', cursive;
+}
+
+.font-devanagari {
+  font-family: 'Noto Sans Devanagari', sans-serif;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #1c0a0a;
+}
+::-webkit-scrollbar-thumb {
+  background: #852222;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #b91c1c;
+}
+
+/* Astrological Parchment & Red accents */
+.bg-parchment {
+  background-color: #fbf5e6;
+  color: #2b1810;
+}
+
+.bg-lalkitab-red {
+  background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 50%, #450a0a 100%);
+}
+
+.border-vedic-gold {
+  border-color: #d97706;
+}
+
+/* Print styles for generating Astrological Dossier */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+}

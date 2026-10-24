@@ -1,0 +1,6 @@
+{
+  "name": "Lal Kitab Astrology Software by Mohini Sharma",
+  "description": "Complete Lal Kitab Astrological Software based on Arun Samhita: automated Kundali generation, Varshphal, marriage timing, financial growth, black magic protection, and personalized remedies.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

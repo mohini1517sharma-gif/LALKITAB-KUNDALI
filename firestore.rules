@@ -1,0 +1,111 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Common Security Primitives
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Validation Blueprint for UserProfile
+    function isValidUserProfile(data) {
+      return data.keys().hasAll(['id', 'email', 'createdAt']) &&
+             data.keys().hasOnly(['id', 'email', 'displayName', 'photoURL', 'createdAt', 'updatedAt']) &&
+             data.id == request.auth.uid &&
+             data.id is string && isValidId(data.id) &&
+             data.email is string && data.email.size() <= 254 &&
+             (!('displayName' in data) || (data.displayName is string && data.displayName.size() <= 100)) &&
+             (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 500)) &&
+             data.createdAt is timestamp &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    // Validation Blueprint for SavedKundali
+    function isValidSavedKundali(data) {
+      return data.keys().hasAll(['id', 'userId', 'name', 'dob', 'tob', 'pob', 'createdAt']) &&
+             data.keys().hasOnly(['id', 'userId', 'name', 'gender', 'dob', 'tob', 'pob', 'currentAge', 'majorObstacle', 'createdAt', 'updatedAt']) &&
+             data.userId == request.auth.uid &&
+             data.id is string && isValidId(data.id) &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             (!('gender' in data) || data.gender in ['male', 'female', 'other']) &&
+             data.dob is string && data.dob.size() <= 15 &&
+             data.tob is string && data.tob.size() <= 10 &&
+             data.pob is string && data.pob.size() <= 100 &&
+             (!('currentAge' in data) || data.currentAge is number) &&
+             (!('majorObstacle' in data) || (data.majorObstacle is string && data.majorObstacle.size() <= 500)) &&
+             data.createdAt is timestamp &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    // Validation Blueprint for RemedyTracker
+    function isValidRemedyTracker(data) {
+      return data.keys().hasAll(['id', 'userId', 'remedyTitle', 'targetDays', 'completedDays', 'status', 'createdAt']) &&
+             data.keys().hasOnly(['id', 'userId', 'remedyTitle', 'planet', 'targetDays', 'completedDays', 'status', 'startDate', 'createdAt', 'updatedAt']) &&
+             data.userId == request.auth.uid &&
+             data.id is string && isValidId(data.id) &&
+             data.remedyTitle is string && data.remedyTitle.size() > 0 && data.remedyTitle.size() <= 200 &&
+             (!('planet' in data) || (data.planet is string && data.planet.size() <= 50)) &&
+             data.targetDays is number && data.targetDays >= 1 && data.targetDays <= 365 &&
+             data.completedDays is number && data.completedDays >= 0 && data.completedDays <= data.targetDays &&
+             data.status in ['active', 'completed', 'paused'] &&
+             (!('startDate' in data) || (data.startDate is string && data.startDate.size() <= 20)) &&
+             data.createdAt is timestamp &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false; // Strict PII protection
+      allow create: if isOwner(userId) && isValidId(userId) && isValidUserProfile(incoming());
+      allow update: if isOwner(userId) && isValidId(userId) && isValidUserProfile(incoming()) &&
+                      incoming().createdAt == existing().createdAt &&
+                      incoming().id == existing().id;
+      allow delete: if isOwner(userId) && isValidId(userId);
+    }
+
+    // Saved Kundalis Collection
+    match /savedKundalis/{kundaliId} {
+      allow get: if isSignedIn() && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(kundaliId) && isValidSavedKundali(incoming());
+      allow update: if isSignedIn() && isValidId(kundaliId) && isValidSavedKundali(incoming()) &&
+                      incoming().userId == existing().userId &&
+                      incoming().createdAt == existing().createdAt &&
+                      incoming().id == existing().id;
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+    }
+
+    // 43-Day Remedy Trackers Collection
+    match /remedyTrackers/{trackerId} {
+      allow get: if isSignedIn() && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(trackerId) && isValidRemedyTracker(incoming());
+      allow update: if isSignedIn() && isValidId(trackerId) && isValidRemedyTracker(incoming()) &&
+                      incoming().userId == existing().userId &&
+                      incoming().createdAt == existing().createdAt &&
+                      incoming().id == existing().id;
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+    }
+  }
+}
